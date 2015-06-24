@@ -1,3 +1,7 @@
+# Version 1.2.0 - June 24, 2015
+
+* Allow overriding the batch size on the command line (thanks to Richard Boulton once again!)
+
 # Version 1.1.0 - May 12, 2015
 
 * Allow specifying additional index settings to the `restore` and `restore_alias` commands (thanks again Richard Boulton!)
