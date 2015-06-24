@@ -23,11 +23,11 @@ To dump an ElasticSearch index by type to a file:
 
 To restore an index to an ElasticSearch server:
 
-    es_dump_restore restore ELASTIC_SEARCH_SERVER_URL DESTINATION_INDEX FILENAME_ZIP [SETTING_OVERRIDES]
+    es_dump_restore restore ELASTIC_SEARCH_SERVER_URL DESTINATION_INDEX FILENAME_ZIP [SETTING_OVERRIDES] [BATCH_SIZE]
 
 To restore an index and set an alias to point to it:
 
-    es_dump_restore restore_alias ELASTIC_SEARCH_SERVER_URL DESTINATION_ALIAS DESTINATION_INDEX FILENAME_ZIP [SETTING_OVERRIDES]
+    es_dump_restore restore_alias ELASTIC_SEARCH_SERVER_URL DESTINATION_ALIAS DESTINATION_INDEX FILENAME_ZIP [SETTING_OVERRIDES] [BATCH_SIZE]
 
 This loads the dump into an index named `DESTINATION_INDEX`, and once the load
 is complete sets the alias `DESTINATION_ALIAS` to point to it.  If
@@ -47,6 +47,11 @@ would read the dump file `test_dump.zip`, load it into an index called
 `test-1276512`, then set the alias `test` to point to this index.  The index
 would be set to have no replicas, and only 1 shard, but have all other settings
 from the dump file.
+
+If `BATCH_SIZE` is set for a restore command, it controls the number of
+documents which will be sent to elasticsearch at once.  This defaults to 1000,
+which is normally fine, but if you have particularly complex documents or
+mappings this might need reducing to avoid timeouts.
 
 ## Contributing
 

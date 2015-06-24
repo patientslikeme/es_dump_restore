@@ -61,14 +61,14 @@ module EsDumpRestore
     end
 
     desc "restore URL INDEX_NAME FILENAME", "Restores a dumpfile into the given ElasticSearch index"
-    def restore(url, index_name, filename, overrides=nil)
+    def restore(url, index_name, filename, overrides = nil, batch_size = 1000)
       client = EsClient.new(url, index_name, nil)
 
       Dumpfile.read(filename) do |dumpfile|
         client.create_index(dumpfile.index, overrides)
 
         bar = ProgressBar.new(dumpfile.num_objects) unless options[:noprogressbar]
-        dumpfile.scan_objects(1000) do |batch, size|
+        dumpfile.scan_objects(batch_size.to_i) do |batch, size|
           client.bulk_index batch
           bar.increment!(size) unless options[:noprogressbar]
         end
@@ -76,7 +76,8 @@ module EsDumpRestore
     end
 
     desc "restore_alias URL ALIAS_NAME INDEX_NAME FILENAME", "Restores a dumpfile into the given ElasticSearch index, and then sets the alias to point at that index, removing any existing indexes pointed at by the alias"
-    def restore_alias(url, alias_name, index_name, filename, overrides=nil)
+    def restore_alias(url, alias_name, index_name, filename, overrides = nil,
+                      batch_size = 1000)
       client = EsClient.new(url, index_name, nil)
       client.check_alias alias_name
 
@@ -84,7 +85,7 @@ module EsDumpRestore
         client.create_index(dumpfile.index, overrides)
 
         bar = ProgressBar.new(dumpfile.num_objects) unless options[:noprogressbar]
-        dumpfile.scan_objects(1000) do |batch, size|
+        dumpfile.scan_objects(batch_size.to_i) do |batch, size|
           client.bulk_index batch
           bar.increment!(size) unless options[:noprogressbar]
         end
