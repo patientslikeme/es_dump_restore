@@ -1,3 +1,10 @@
+# Version 2.0.0 - July 1, 2015
+
+Thanks to Alex Tomlins for this feature contribution
+
+* Make progress bar options globally available
+* VERY MINOR BREAKING CHANGE: Invert the `--noprogressbar` option, which is now `--progressbar` or `--no-progress-bar`
+
 # Version 1.2.0 - June 24, 2015
 
 * Allow overriding the batch size on the command line (thanks to Richard Boulton once again!)
