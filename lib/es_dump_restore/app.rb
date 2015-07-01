@@ -6,8 +6,11 @@ require "multi_json"
 
 module EsDumpRestore
   class App < Thor
-    
-    option :noprogressbar, :type => :boolean # switch for showing progress bar
+    class_option :progressbar,
+      type: :boolean,
+      default: $stderr.isatty,
+      desc: "Whether to show the progress bar. Defaults to true if STDERR is a TTY, false otherwise."
+
     option :verbose, :type => :boolean # add some additional output
 
     desc "dump URL INDEX_NAME FILENAME", "Creates a dumpfile based on the given ElasticSearch index"
@@ -22,13 +25,13 @@ module EsDumpRestore
 
         client.start_scan do |scroll_id, total|
           dumpfile.num_objects = total
-          bar = ProgressBar.new(total) unless options[:noprogressbar]
+          bar = ProgressBar.new(total) if options[:progressbar]
 
           dumpfile.get_objects_output_stream do |out|
             client.each_scroll_hit(scroll_id) do |hit|
               metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
               out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
-              bar.increment! unless options[:noprogressbar]
+              bar.increment! if options[:progressbar]
             end
           end
         end
@@ -47,13 +50,13 @@ module EsDumpRestore
 
         client.start_scan do |scroll_id, total|
           dumpfile.num_objects = total
-          bar = ProgressBar.new(total) unless options[:noprogressbar]
+          bar = ProgressBar.new(total) if options[:progressbar]
 
           dumpfile.get_objects_output_stream do |out|
             client.each_scroll_hit(scroll_id) do |hit|
               metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
               out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
-              bar.increment! unless options[:noprogressbar]
+              bar.increment! if options[:progressbar]
             end
           end
         end
@@ -67,10 +70,10 @@ module EsDumpRestore
       Dumpfile.read(filename) do |dumpfile|
         client.create_index(dumpfile.index, overrides)
 
-        bar = ProgressBar.new(dumpfile.num_objects) unless options[:noprogressbar]
+        bar = ProgressBar.new(dumpfile.num_objects) if options[:progressbar]
         dumpfile.scan_objects(batch_size.to_i) do |batch, size|
           client.bulk_index batch
-          bar.increment!(size) unless options[:noprogressbar]
+          bar.increment!(size) if options[:progressbar]
         end
       end
     end
@@ -84,10 +87,10 @@ module EsDumpRestore
       Dumpfile.read(filename) do |dumpfile|
         client.create_index(dumpfile.index, overrides)
 
-        bar = ProgressBar.new(dumpfile.num_objects) unless options[:noprogressbar]
+        bar = ProgressBar.new(dumpfile.num_objects) if options[:progressbar]
         dumpfile.scan_objects(batch_size.to_i) do |batch, size|
           client.bulk_index batch
-          bar.increment!(size) unless options[:noprogressbar]
+          bar.increment!(size) if options[:progressbar]
         end
       end
 
