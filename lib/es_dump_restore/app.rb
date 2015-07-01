@@ -8,8 +8,8 @@ module EsDumpRestore
   class App < Thor
     class_option :progressbar,
       type: :boolean,
-      default: true,
-      desc: "Whether to show the progress bar."
+      default: $stderr.isatty,
+      desc: "Whether to show the progress bar. Defaults to true if STDERR is a TTY, false otherwise."
 
     option :verbose, :type => :boolean # add some additional output
 
