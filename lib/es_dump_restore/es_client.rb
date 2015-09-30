@@ -29,7 +29,7 @@ module EsDumpRestore
     end
 
     def settings
-      data = request(:get, "#{@path_prefix}/_settings")
+      data = request(:get, "#{@index_name}/_settings")
       if data.values.size != 1
         raise "Unexpected response: #{data}"
       end
