@@ -44,7 +44,10 @@ module EsDumpRestore
     def start_scan(&block)
       scroll = request(:get, "#{@path_prefix}/_search",
         query: { search_type: 'scan', scroll: '10m', size: 500 },
-        body: MultiJson.dump({ query: { match_all: {} } }) )
+        body: MultiJson.dump({
+          fields: ['_source', '_timestamp', '_version', '_routing', '_percolate', '_parent', '_ttl'],
+          query: { match_all: {} } }
+        ))
       total = scroll["hits"]["total"]
       scroll_id = scroll["_scroll_id"]
 

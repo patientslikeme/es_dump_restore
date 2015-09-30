@@ -29,7 +29,11 @@ module EsDumpRestore
 
           dumpfile.get_objects_output_stream do |out|
             client.each_scroll_hit(scroll_id) do |hit|
+              hit['fields'] ||= {}
               metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
+              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
+                metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
+              end
               out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
               bar.increment! if options[:progressbar]
             end
@@ -54,7 +58,11 @@ module EsDumpRestore
 
           dumpfile.get_objects_output_stream do |out|
             client.each_scroll_hit(scroll_id) do |hit|
+              hit['fields'] ||= {}
               metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
+              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
+                metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
+              end
               out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
               bar.increment! if options[:progressbar]
             end
