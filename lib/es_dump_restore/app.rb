@@ -16,59 +16,13 @@ module EsDumpRestore
     desc "dump URL INDEX_NAME FILENAME", "Creates a dumpfile based on the given ElasticSearch index"
     def dump(url, index_name, filename)
       client = EsClient.new(url, index_name, nil)
-
-      Dumpfile.write(filename) do |dumpfile|
-        dumpfile.index = {
-          settings: client.settings,
-          mappings: client.mappings
-        }
-
-        client.start_scan do |scroll_id, total|
-          dumpfile.num_objects = total
-          bar = ProgressBar.new(total) if options[:progressbar]
-
-          dumpfile.get_objects_output_stream do |out|
-            client.each_scroll_hit(scroll_id) do |hit|
-              hit['fields'] ||= {}
-              metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
-              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
-                metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
-              end
-              out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
-              bar.increment! if options[:progressbar]
-            end
-          end
-        end
-      end
+      _dump(client, filename)
     end
 
     desc "dump_type URL INDEX_NAME TYPE FILENAME", "Creates a dumpfile based on the given ElasticSearch index"
     def dump_type(url, index_name, type, filename)
       client = EsClient.new(url, index_name, type)
-
-      Dumpfile.write(filename) do |dumpfile|
-        dumpfile.index = {
-          settings: client.settings,
-          mappings: client.mappings
-        }
-
-        client.start_scan do |scroll_id, total|
-          dumpfile.num_objects = total
-          bar = ProgressBar.new(total) if options[:progressbar]
-
-          dumpfile.get_objects_output_stream do |out|
-            client.each_scroll_hit(scroll_id) do |hit|
-              hit['fields'] ||= {}
-              metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
-              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
-                metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
-              end
-              out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
-              bar.increment! if options[:progressbar]
-            end
-          end
-        end
-      end
+      _dump(client, filename)
     end
 
     desc "restore URL INDEX_NAME FILENAME", "Restores a dumpfile into the given ElasticSearch index"
@@ -105,5 +59,35 @@ module EsDumpRestore
       client.replace_alias_and_close_old_index alias_name
     end
 
+    private
+
+    def _dump(client, filename)
+      Dumpfile.write(filename) do |dumpfile|
+        dumpfile.index = {
+          settings: client.settings,
+          mappings: client.mappings
+        }
+
+        client.start_scan do |scroll_id, total|
+          dumpfile.num_objects = total
+          bar = ProgressBar.new(total) if options[:progressbar]
+
+          dumpfile.get_objects_output_stream do |out|
+            client.each_scroll_hit(scroll_id) do |hit|
+              hit['fields'] ||= {}
+              metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
+
+              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
+                metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
+              end
+
+              out.write("#{MultiJson.dump(metadata)}\n#{MultiJson.dump(hit["_source"])}\n")
+
+              bar.increment! if options[:progressbar]
+            end
+          end
+        end
+      end
+    end
   end
 end
