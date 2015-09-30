@@ -1,3 +1,8 @@
+# Version 2.1.0 - September 30, 2015
+
+* Dump index metadata along with data
+* Bugfix: correctly retrieve \_settings when using the dump_type action
+
 # Version 2.0.0 - July 1, 2015
 
 Thanks to Alex Tomlins for this feature contribution
