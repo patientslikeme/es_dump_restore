@@ -7,12 +7,13 @@ module EsDumpRestore
     attr_accessor :base_uri
     attr_accessor :index_name
 
-    def initialize(base_uri, index_name, type)
+    def initialize(base_uri, index_name, type, exception_retries=1)
       @httpclient = HTTPClient.new
       @index_name = index_name
 
       @es_uri = base_uri
       @path_prefix = type.nil? ? index_name : index_name + "/" + type
+      @exception_retries = exception_retries
     end
 
     def mappings
@@ -124,7 +125,17 @@ module EsDumpRestore
     end
 
     def bulk_index(data)
-      request(:post, "#{@path_prefix}/_bulk", :body => data)
+      retries = 0
+      begin
+        request(:post, "#{@path_prefix}/_bulk", :body => data)
+      rescue HTTPClient::TimeoutError => e
+        if retries < @exception_retries
+          retries += 1
+          puts "Retrying (#{retries} of #{@exception_retries}) '#{@path_prefix}/_bulk'"
+          retry
+        end
+        raise e
+      end
     end
 
     private
