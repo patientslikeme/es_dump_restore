@@ -1,3 +1,7 @@
+# Version 2.2.1 - November 10, 2017
+
+* Add a 5-second sleep between retries (thanks to David Henry!)
+
 # Version 2.2.0 - October 20, 2017
 
 * Add an optional command-line parameter for retries on timeout errors (thanks to David Henry!)
