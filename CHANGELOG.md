@@ -1,3 +1,7 @@
+# Version 2.2.0 - October 20, 2017
+
+* Add an optional command-line parameter for retries on timeout errors (thanks to David Henry!)
+
 # Version 2.1.0 - September 30, 2015
 
 * Dump index metadata along with data
