@@ -4,6 +4,8 @@ require 'multi_json'
 
 module EsDumpRestore
   class EsClient
+    SLEEP_BETWEEN_RETRIES = 5
+
     attr_accessor :base_uri
     attr_accessor :index_name
 
@@ -132,6 +134,7 @@ module EsDumpRestore
         if retries < @exception_retries
           retries += 1
           puts "Retrying (#{retries} of #{@exception_retries}) '#{@path_prefix}/_bulk'"
+          sleep SLEEP_BETWEEN_RETRIES # add a sleep here so we aren't hammering the server
           retry
         end
         raise e
