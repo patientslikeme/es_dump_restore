@@ -43,6 +43,7 @@ module EsDumpRestore
     desc "restore_alias URL ALIAS_NAME INDEX_NAME FILENAME", "Restores a dumpfile into the given ElasticSearch index, and then sets the alias to point at that index, removing any existing indexes pointed at by the alias"
     def restore_alias(url, alias_name, index_name, filename, overrides = nil,
                       batch_size = 1000, exception_retries = 1)
+      exception_retries = exception_retries.to_i
       client = EsClient.new(url, index_name, nil, exception_retries)
       client.check_alias alias_name
 
