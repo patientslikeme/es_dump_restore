@@ -1,3 +1,7 @@
+# Version 2.2.2 - November 13, 2017
+
+* Fix for incorrect parsing of the retry command-line parameter (thanks to Mat Moore!)
+
 # Version 2.2.1 - November 10, 2017
 
 * Add a 5-second sleep between retries (thanks to David Henry!)
