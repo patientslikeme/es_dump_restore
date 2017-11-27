@@ -14,15 +14,17 @@ module EsDumpRestore
     option :verbose, :type => :boolean # add some additional output
 
     desc "dump URL INDEX_NAME FILENAME", "Creates a dumpfile based on the given ElasticSearch index"
+    method_option :preserve_versions, type: :boolean, desc: "Whether to record the current version for each indexed document"
     def dump(url, index_name, filename)
       client = EsClient.new(url, index_name, nil)
-      _dump(client, filename)
+      _dump(client, filename, options[:preserve_versions])
     end
 
     desc "dump_type URL INDEX_NAME TYPE FILENAME", "Creates a dumpfile based on the given ElasticSearch index"
+    method_option :preserve_versions, type: :boolean, desc: "Whether to record the current version for each indexed document"
     def dump_type(url, index_name, type, filename)
       client = EsClient.new(url, index_name, type)
-      _dump(client, filename)
+      _dump(client, filename, options[:preserve_versions])
     end
 
     desc "restore URL INDEX_NAME FILENAME", "Restores a dumpfile into the given ElasticSearch index"
@@ -62,7 +64,7 @@ module EsDumpRestore
 
     private
 
-    def _dump(client, filename)
+    def _dump(client, filename, preserve_versions)
       Dumpfile.write(filename) do |dumpfile|
         dumpfile.index = {
           settings: client.settings,
@@ -77,8 +79,12 @@ module EsDumpRestore
             client.each_scroll_hit(scroll_id) do |hit|
               hit['fields'] ||= {}
               metadata = { index: { _type: hit["_type"], _id: hit["_id"] } }
+              if preserve_versions
+                metadata[:index][:version_type] = :external
+                metadata[:index][:_version] = hit["_version"]
+              end
 
-              %w(_timestamp _version _routing _percolate _parent _ttl).each do |metadata_field|
+              %w(_timestamp _routing _percolate _parent _ttl).each do |metadata_field|
                 metadata[:index][metadata_field] = hit['fields'][metadata_field] if hit['fields'][metadata_field]
               end
 
