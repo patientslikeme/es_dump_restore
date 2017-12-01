@@ -1,3 +1,10 @@
+# Version 3.0.0 - December 1, 2017
+
+* Fixes a bug causing document versions not to be recorded
+* BREAKING CHANGE: Exposes a --preserve-versions option to dump and dump_type with a default value
+  of **false** in order to record document versions. Previous intended default behavior was to
+  preserve versions.
+
 # Version 2.2.2 - November 13, 2017
 
 * Fix for incorrect parsing of the retry command-line parameter (thanks to Mat Moore!)
